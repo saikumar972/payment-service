@@ -1,6 +1,7 @@
 package com.payment.service;
 
 import com.payment.entity.Payment;
+import com.payment.exception.PaymentErrorMessage;
 import com.payment.repo.PaymentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,12 +18,13 @@ public class PaymentService {
     }
 
     public String getPaymentStatus(String paymentMode,double purchaseAmount){
-        double availableAmount= paymentRepo.getAmountByPaymentSource(paymentMode);
+
+        Payment payment= paymentRepo.getPaymentByPaymentSource(paymentMode).orElseThrow(()->new PaymentErrorMessage(paymentMode+" is Invalid payment option please chose upi/cash/netBanking"));
+        double availableAmount=payment.getAmount();
         if(availableAmount<purchaseAmount){
-            throw new IllegalArgumentException("Entered amount is exceeded the available limit");
+            throw new PaymentErrorMessage("Entered amount "+purchaseAmount+" is exceeded the available limit");
         }else{
-            Payment payment = paymentRepo.findByPaymentMode(paymentMode)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid payment mode: " + paymentMode));            payment.setAmount(availableAmount-purchaseAmount);
+            payment.setAmount(availableAmount-purchaseAmount);
             paymentRepo.save(payment);
         }
         return "payment success";

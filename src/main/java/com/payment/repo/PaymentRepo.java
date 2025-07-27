@@ -14,5 +14,8 @@ public interface PaymentRepo extends JpaRepository<Payment,Long> {
     Optional<Payment> findByPaymentMode(String paymentMode);
 
     @Query(value = "select amount from payment where payment_Mode =:paymentMode",nativeQuery = true)
-    public double getAmountByPaymentSource(@Param("paymentMode") String paymentMode);
+    Optional<Double> getAmountByPaymentSource(@Param("paymentMode") String paymentMode);
+
+    @Query(value = "select * from payment where payment_Mode =:paymentMode",nativeQuery = true)
+    Optional<Payment> getPaymentByPaymentSource(@Param("paymentMode") String paymentMode);
 }
